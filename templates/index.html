@@ -1,19 +1,17 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-<body>
 {%extends "base.html"%}
 {%block content%}
-    {%if current_user.is_authenticated %}
-        <h1>Ура! Вы авторизованы</h1>
-    {% endif %}
-{% endblock %}
+<link rel="stylesheet" href="../../static/css/style.css">
 
-</body>
-</html>
+
+{% for sound in sounds%}
+
+<div class="soundpost">
+    <h3>{{sound.name}}</h3>
+    <p>{{sound.description}}</p>
+    <audio controls>
+    <source src = "../../static/sounds/{{sound.filename}}">
+    </audio>
+</div>
+<br>
+{%endfor%}
+{% endblock %}
