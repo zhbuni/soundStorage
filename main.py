@@ -5,12 +5,16 @@ from data.sounds import Sound
 
 from forms.login import LoginForm
 from forms.register import RegisterForm
+from forms.upload_sound import UploadSoundForm
 
 from flask_login import LoginManager, login_user, \
     current_user, login_required, \
     logout_user
 
+from werkzeug.utils import secure_filename
+
 import datetime
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'need_to_change_secret_key'
@@ -83,6 +87,36 @@ def login():
 def index():
     sounds = db_sess.query(Sound).all()
     return render_template('index.html', title='Sound Storage', sounds=sounds)
+
+
+@app.route('/upload_sound', methods=['GET', 'POST'])
+@login_required
+def upload_sound():
+    form = UploadSoundForm()
+
+    if form.validate_on_submit():
+        # получаем файл
+        file = form.file.data
+        # получаем айди последней записи, чтобы дать имя новой
+        last_id = db_sess.query(Sound).order_by(Sound.id.desc()).first().id
+        filename = secure_filename(file.filename)
+        # создаем название файла с новым именем и оригинальным разширением
+        filename = str(last_id + 1) + '.' + filename.split('.')[-1]
+
+        sound = Sound()
+        # собираем данные с формы
+        sound.name = form.name.data
+        sound.description = form.description.data
+        sound.filename = filename
+
+        # сохраняем файл и добавляем запись в бд
+        file.save(os.path.join('static/sounds/', filename))
+        db_sess.add(sound)
+        db_sess.commit()
+
+        # возвращаем на главную страницу
+        return redirect('/')
+    return render_template('upload_sound.html', title='Загрузка файла', form=form)
 
 
 if __name__ == '__main__':

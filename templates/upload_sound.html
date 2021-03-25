@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Загрузка звука</h1>
+<form action="" method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(class="form-control") }}<br>
+        {% for error in form.name.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.description.label }}<br>
+        {{ form.description(class="form-control") }}<br>
+        {% for error in form.description.errors %}
+            <p content="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.file.label }}<br>
+        {{ form.file(class="form-control") }}<br>
+        {% for error in form.file.errors %}
+            <p content="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    {{message}}
+</form>
+</form>
+{% endblock %}
