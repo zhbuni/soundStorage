@@ -4,6 +4,8 @@
 
 {% if current_user.is_authenticated %}
     <a href="upload_sound" class="btn btn-secondary">Upload a sound</a>
+{% else %}
+    <a href="login" class="btn btn-secondary">Upload a sound</a>
 {% endif %}
 
 
