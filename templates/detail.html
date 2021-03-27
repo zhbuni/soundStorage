@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{sound.name}}</title>
+</head>
+<body>
+{% extends "base.html" %}
+{% block content %}
+    <h1>{{sound.name}}</h1>
+    {% if sound.description %}
+        Описание: {{sound.description}}<br>
+    {% endif %}
+    Количество загрузок: {{sound.downloads}}<br>
+    Дата создания: {{sound.datetime.day}}-{{sound.datetime.month}}-{{sound.datetime.year}}<br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.content(class="form-control", type="text-area") }}<br>
+            {% for error in form.content.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary")}}</p>
+    </form>
+    {% for comment in comments %}
+        <div class="col-md6 border rounded">
+            {% if comment.user_id is not none %}
+            <strong>
+                {{comment.user.name}} {{comment.user.surname}}
+            </strong>
+            {% endif %}
+            <div>{{comment.datetime.day}}.{{comment.datetime.month}}.{{comment.datetime.year}}</div>
+            <br>
+            <div>
+                {{comment.content}}
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}
+</body>
+</html>

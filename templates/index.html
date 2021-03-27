@@ -6,7 +6,7 @@
 {% for sound in sounds%}
 
 <div class="soundpost">
-    <h3>{{sound.name}}</h3>
+    <a href="/sound/{{sound.id}}" ><h3>{{sound.name}}</h3></a>
     <p>{{sound.description}}</p>
     <audio controls>
     <source src = "../../static/sounds/{{sound.filename}}">
