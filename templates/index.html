@@ -7,14 +7,16 @@
 {% endif %}
 
 
-{% for sound in sounds%}
+{% for item in data%}
 
 <div class="soundpost">
-    <a href="/sound/{{sound.id}}" ><h3>{{sound.name}}</h3></a>
-    <p>{{sound.description}}</p>
+    <a href="/sound/{{item[0].id}}" ><h3>{{item[0].name}}</h3></a>
+    <img src="../../static/images/{{ item[1].image }}" alt="" width="100" height="100">
+    <p>Автор: {{ item[1].nickname }}</p>
     <audio controls>
-    <source src = "../../static/sounds/{{sound.filename}}">
+    <source src = "../../static/sounds/{{item[0].filename}}">
     </audio>
+    <p>{{item[0].description}}</p>
 </div>
 <br>
 {%endfor%}
