@@ -14,3 +14,6 @@ class Sound(SqlAlchemyBase):
     description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     downloads = sqlalchemy.Column(sqlalchemy.Integer, default=0)
     datetime = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
+
+    author_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'))
+    user = orm.relation('User')

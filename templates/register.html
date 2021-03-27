@@ -11,11 +11,31 @@
 {% extends "base.html" %}
 {% block content %}
     <h1>Register form</h1>
-    {% if message: %}
+    {% if message %}
         <div class="alert alert-danger">{{ message }}</div>
     {%endif%}
-    <form action="" method="post">
+    <form action="" method="post" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
+
+        <p>
+            {{ form.nickname.label }}<br>
+            {{ form.nickname(class="form-control") }}<br>
+            {% for error in form.nickname.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.profile_description.label }}<br>
+            {{ form.profile_description(class="form-control") }}<br>
+            {% for error in form.profile_description.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
         <p>
             {{ form.email.label }}<br>
             {{ form.email(class="form-control", type="email") }}<br>
@@ -44,28 +64,10 @@
             {% endfor %}
         </p>
         <p>
-            {{ form.surname.label }}<br>
-            {{ form.surname(class="form-control") }}<br>
-            {% for error in form.surname.errors %}
-                <p class="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.name.label }}<br>
-            {{ form.name(class="form-control") }}<br>
-            {% for error in form.name.errors %}
-                <p class="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.age.label }}<br>
-            {{ form.age(class="form-control") }}<br>
-            {% for error in form.age.errors %}
-                <p class="alert alert-danger" role="alert">
+            {{ form.file.label }}<br>
+            {{ form.file(class="form-control") }}<br>
+            {% for error in form.file.errors %}
+                <p content="alert alert-danger" role="alert">
                     {{ error }}
                 </p>
             {% endfor %}

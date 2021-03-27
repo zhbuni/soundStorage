@@ -34,7 +34,7 @@ def load_user(user_id):
 
 
 @app.route('/register', methods=['GET', 'POST'])
-def reqister():
+def register():
     if current_user.is_authenticated:
         return redirect('/')
     form = RegisterForm()
@@ -46,13 +46,34 @@ def reqister():
         if db_sess.query(User).filter(User.email == form.email.data).first():
             return render_template('register.html', title='Регистрация',
                                    form=form,
+                                   message="Эта почта уже зарегестрирована")
+        if db_sess.query(User).filter(User.nickname == form.nickname.data).first():
+            return render_template('register.html', title='Регистрация',
+                                   form=form,
                                    message="Такой пользователь уже есть")
+
         user = User(
-            name=form.name.data,
-            surname=form.surname.data,
+            nickname=form.nickname.data,
+            profile_description=form.profile_description.data,
             email=form.email.data,
-            age=form.age.data,
         )
+
+        file = form.file.data
+        # если пришел файл, то ставим аватарку. если нет, до дефолтную картинку
+        if file:
+            last_id = db_sess.query(User).order_by(User.id.desc()).first()
+            if not last_id:
+                last_id = 0
+            else:
+                last_id = last_id.id
+            filename = secure_filename(file.filename)
+            # создаем название файла с новым именем и оригинальным разширением
+            filename = str(last_id + 1) + '.' + filename.split('.')[-1]
+            user.image = filename
+            file.save(os.path.join('static', 'images/', filename))
+        else:
+            user.image = 'default-profile-picture.jpg'
+
         user.set_password(form.password.data)
         db_sess.add(user)
         db_sess.commit()
@@ -86,7 +107,10 @@ def login():
 @app.route('/')
 def index():
     sounds = db_sess.query(Sound).all()
-    return render_template('index.html', title='Sound Storage', sounds=sounds)
+    data = []
+    for sound in sounds:
+        data.append([sound, db_sess.query(User).get(sound.author_id)])
+    return render_template('index.html', title='Sound Storage', data=data)
 
 
 @app.route('/upload_sound', methods=['GET', 'POST'])
@@ -98,16 +122,20 @@ def upload_sound():
         # получаем файл
         file = form.file.data
         # получаем айди последней записи, чтобы дать имя новой
-        last_id = db_sess.query(Sound).order_by(Sound.id.desc()).first().id
+        last_id = db_sess.query(Sound).order_by(Sound.id.desc()).first()
+        if not last_id:
+            last_id = 1
+        else:
+            last_id = last_id.id
         filename = secure_filename(file.filename)
         # создаем название файла с новым именем и оригинальным разширением
         filename = str(last_id + 1) + '.' + filename.split('.')[-1]
 
-        sound = Sound()
-        # собираем данные с формы
-        sound.name = form.name.data
-        sound.description = form.description.data
-        sound.filename = filename
+        sound = Sound(
+            name=form.name.data,
+            description=form.description.data,
+            filename=filename,
+            user=current_user)
 
         # сохраняем файл и добавляем запись в бд
         file.save(os.path.join('static/sounds/', filename))
