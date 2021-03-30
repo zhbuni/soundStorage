@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <div>
+        <h2>{{ user.nickname }}</h2>
+        <p>
+            Зарегестрирован: {{ user.registration_date.day }}.{{ user.registration_date.month }}.{{ user.registration_date.year }}</p>
+        <p>{{ user.profile_description }}</p>
+        <img src="../../static/images/{{ user.image }}" alt="" width="100" height="100">
+    </div>
+
+    <br>
+    {% if current_user.id == user.id %}
+        <a href="../logout" class="btn btn-danger">Logout</a>
+    {% endif %}
+    <br>
+
+    <h3>Звуки пользователя</h3>
+    <div>
+        {% for sound in sounds %}
+
+            <div class="soundpost">
+                <a href="/sound/{{ sound.id }}"><h3>{{ sound.name }}</h3></a>
+                <img src="../../static/images/{{ user.image }}" alt="" width="100" height="100">
+                <p>Автор: {{ user.nickname }}</p>
+                <audio controls>
+                    <source src="../../static/sounds/{{ sound.filename }}">
+                </audio>
+                <p>{{ sound.description }}</p>
+            </div>
+            </div>
+        {% endfor %}
+{% endblock %}

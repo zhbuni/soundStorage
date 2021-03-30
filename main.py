@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, abort
 from data import db_session
 from data.users import User
 from data.sounds import Sound
@@ -17,6 +17,14 @@ from werkzeug.utils import secure_filename
 
 import datetime
 import os
+import string
+import random
+
+
+def generate_random_string(n):
+    chrs = string.ascii_letters + string.digits
+    return ''.join([random.choice(chrs) for i in range(n)])
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'need_to_change_secret_key'
@@ -28,6 +36,11 @@ login_manager.init_app(app)
 
 db_session.global_init("db/soundStorage.db")
 db_sess = db_session.create_session()
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 @login_manager.user_loader
@@ -63,14 +76,9 @@ def register():
         file = form.file.data
         # если пришел файл, то ставим аватарку. если нет, до дефолтную картинку
         if file:
-            last_id = db_sess.query(User).order_by(User.id.desc()).first()
-            if not last_id:
-                last_id = 0
-            else:
-                last_id = last_id.id
             filename = secure_filename(file.filename)
             # создаем название файла с новым именем и оригинальным разширением
-            filename = str(last_id + 1) + '.' + filename.split('.')[-1]
+            filename = generate_random_string(9) + '.' + filename.split('.')[-1]
             user.image = filename
             file.save(os.path.join('static', 'images/', filename))
         else:
@@ -149,15 +157,9 @@ def upload_sound():
     if form.validate_on_submit():
         # получаем файл
         file = form.file.data
-        # получаем айди последней записи, чтобы дать имя новой
-        last_id = db_sess.query(Sound).order_by(Sound.id.desc()).first()
-        if not last_id:
-            last_id = 1
-        else:
-            last_id = last_id.id
         filename = secure_filename(file.filename)
         # создаем название файла с новым именем и оригинальным разширением
-        filename = str(last_id + 1) + '.' + filename.split('.')[-1]
+        filename = generate_random_string(9) + '.' + filename.split('.')[-1]
 
         sound = Sound(
             name=form.name.data,
@@ -173,6 +175,16 @@ def upload_sound():
         # возвращаем на главную страницу
         return redirect('/')
     return render_template('upload_sound.html', title='Загрузка файла', form=form)
+
+
+@app.route('/user/<int:user_id>')
+def user_page(user_id):
+    user = db_sess.query(User).get(user_id)
+    if user:
+        sounds = db_sess.query(Sound).filter(Sound.author_id == user.id).all()
+        return render_template('user_page.html', user=user, sounds=sounds)
+    else:
+        abort(404)
 
 
 if __name__ == '__main__':
