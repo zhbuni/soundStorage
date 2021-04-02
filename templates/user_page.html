@@ -10,9 +10,6 @@
     </div>
 
     <br>
-    {% if current_user.id == user.id %}
-        <a href="../logout" class="btn btn-danger">Logout</a>
-    {% endif %}
     <br>
 
     <h3>Звуки пользователя</h3>
@@ -27,6 +24,7 @@
                     <source src="../../static/sounds/{{ sound.filename }}">
                 </audio>
                 <p>{{ sound.description }}</p>
+                <a class="btn btn-danger" href="/sound/{{sound.id}}/delete">Delete</a>
             </div>
             </div>
         {% endfor %}

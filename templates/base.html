@@ -17,7 +17,8 @@
 
     <nav style="position: absolute; right: 10px; top: 10px;">
         {% if current_user.is_authenticated %}
-        <a class="navbar-brand" href="/user/{{ current_user.id}}">{{ current_user.nickname }}</a>
+        <a class="btn btn-primary" href="/user/{{ current_user.id}}">{{ current_user.nickname }}</a>
+        <a class="btn btn-danger" href="/logout">Logout</a>
         {% else %}
         <p>
             <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
