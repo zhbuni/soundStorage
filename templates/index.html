@@ -1,23 +1,25 @@
-{%extends "base.html"%}
-{%block content%}
-<link rel="stylesheet" href="../../static/css/style.css">
+{% extends "base.html" %}
+{% block content %}
+    <link rel="stylesheet" href="../../static/css/style.css">
 
-{% if current_user.is_authenticated %}
-    <a href="upload_sound" class="btn btn-secondary">Upload a sound</a>
-{% endif %}
+    {% if current_user.is_authenticated %}
+        <a href="upload_sound" class="btn btn-secondary">Upload a sound</a>
+    {% else %}
+        <a href="register" class="btn btn-secondary">Upload a sound</a>
+    {% endif %}
 
 
-{% for item in data%}
+    {% for item in data %}
 
-<div class="soundpost">
-    <a href="/sound/{{item[0].id}}" ><h3>{{item[0].name}}</h3></a>
-    <img src="../../static/images/{{ item[1].image }}" alt="" width="100" height="100">
-    <p>Автор: {{ item[1].nickname }}</p>
-    <audio controls>
-    <source src = "../../static/sounds/{{item[0].filename}}">
-    </audio>
-    <p>{{item[0].description}}</p>
-</div>
-<br>
-{%endfor%}
+        <div class="soundpost">
+            <a href="/sound/{{ item[0].id }}"><h3>{{ item[0].name }}</h3></a>
+            <img src="../../static/images/{{ item[1].image }}" alt="" width="100" height="100">
+            <p>Автор: {{ item[1].nickname }}</p>
+            <audio controls>
+                <source src="../../static/sounds/{{ item[0].filename }}">
+            </audio>
+            <p>{{ item[0].description }}</p>
+        </div>
+        <br>
+    {% endfor %}
 {% endblock %}
