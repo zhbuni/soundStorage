@@ -28,6 +28,7 @@
                     <source src="../../static/sounds/{{ sound.filename }}">
                 </audio>
                 <p>{{ sound.description }}</p>
+                <a class="btn btn-danger" href="/sound/{{sound.id}}/delete">Удалить</a>
             </div>
             </div>
         {% endfor %}

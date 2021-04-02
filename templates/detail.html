@@ -13,6 +13,7 @@
     {% endif %}
     Количество загрузок: {{sound.downloads}}<br>
     Дата создания: {{sound.datetime.day}}-{{sound.datetime.month}}-{{sound.datetime.year}}<br>
+    <a href="/sound/{{sound.id}}/download" class="btn btn-secondary">Download</a>
     <br>
     <br>
     <br>
@@ -27,16 +28,13 @@
                 </div>
             {% endfor %}
         </p>
-        <p>{{ form.submit(type="submit", class="btn btn-primary")}}</p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary")}}</p  >
     </form>
     {% for comment in comments %}
         <div class="col-md6 border rounded">
-            {% if comment.user_id is not none %}
-            <strong>
-                {{comment.user.name}} {{comment.user.surname}}
-            </strong>
-            {% endif %}
-            <div>{{comment.datetime.day}}.{{comment.datetime.month}}.{{comment.datetime.year}}</div>
+            <img src="/static/images/default-profile-picture-small.jpg" alt="">
+            <strong>{{comment.user.nickname}}</strong>
+            {{comment.datetime.day}}.{{comment.datetime.month}}.{{comment.datetime.year}}
             <br>
             <div>
                 {{comment.content}}
