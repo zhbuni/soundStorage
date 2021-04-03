@@ -1,23 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{sound.name}}</title>
-</head>
-<body>
 {% extends "base.html" %}
 {% block content %}
-    <h1>{{sound.name}}</h1>
+    <h1>{{ sound.name }}</h1>
+
+    <div>
+        <p>Автор:<a href="../user/{{ sound.user.id }}"> {{ sound.user.nickname }}</a></p>
+
+        <a href="../user/{{ sound.user.id }}"><img src="../../static/images/{{ sound.user.image }}" alt=""
+                                                   width="60" height="60"></a>
+    </div>
+
     {% if sound.description %}
-        Описание: {{sound.description}}<br>
+        <p>Описание: {{ sound.description }}</p>
     {% endif %}
-    Количество загрузок: {{sound.downloads}}<br>
-    Дата создания: {{sound.datetime.day}}-{{sound.datetime.month}}-{{sound.datetime.year}}<br>
-    <a href="/sound/{{sound.id}}/download" class="btn btn-secondary">Download</a>
+    <p>Количество загрузок: {{ sound.downloads }}</p>
+    <p>Дата создания: {{ sound.datetime.day }}-{{ sound.datetime.month }}-{{ sound.datetime.year }}</p>
+    <audio controls>
+        <source src="../../static/sounds/{{ sound.filename }}">
+    </audio>
+    <br>
+    <a href="/sound/{{ sound.id }}/download" class="btn btn-secondary">Скачать</a>
     <br>
     <br>
     <br>
     <br>
+    <h3>Комментарии</h3>
+    <h5>Написать комментарий:</h5>
     <form action="" method="post">
         {{ form.hidden_tag() }}
         <p>
@@ -28,19 +35,22 @@
                 </div>
             {% endfor %}
         </p>
-        <p>{{ form.submit(type="submit", class="btn btn-primary")}}</p  >
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
     </form>
+    <br>
     {% for comment in comments %}
         <div class="col-md6 border rounded">
-            <img src="/static/images/default-profile-picture-small.jpg" alt="">
-            <strong>{{comment.user.nickname}}</strong>
-            {{comment.datetime.day}}.{{comment.datetime.month}}.{{comment.datetime.year}}
+
+            <a href="../user/{{ comment.user.id }}">
+                <img src="../../static/images/{{ comment.user.image }}" alt="" width="60" height="60">
+                <strong>{{ comment.user.nickname }}</strong>
+            </a>
+
+            {{ comment.datetime.day }}.{{ comment.datetime.month }}.{{ comment.datetime.year }}
             <br>
             <div>
-                {{comment.content}}
+                {{ comment.content }}
             </div>
         </div>
     {% endfor %}
 {% endblock %}
-</body>
-</html>

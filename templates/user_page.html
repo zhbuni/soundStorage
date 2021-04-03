@@ -19,17 +19,24 @@
     <h3>Звуки пользователя</h3>
     <div>
         {% for sound in sounds %}
-
             <div class="soundpost">
-                <a href="/sound/{{ sound.id }}"><h3>{{ sound.name }}</h3></a>
+                <h3>{{ sound.name }}</h3>
                 <img src="../../static/images/{{ user.image }}" alt="" width="100" height="100">
                 <p>Автор: {{ user.nickname }}</p>
                 <audio controls>
                     <source src="../../static/sounds/{{ sound.filename }}">
                 </audio>
                 <p>{{ sound.description }}</p>
-                <a class="btn btn-danger" href="/sound/{{sound.id}}/delete">Удалить</a>
-            </div>
+
+                {% if current_user.is_authenticated %}
+                    <a href="/sound/{{ sound.id }}" class="btn btn-secondary">Скачать</a>
+                {% else %}
+                    <a href="/register" class="btn btn-secondary">Скачать</a>
+                {% endif %}
+                {% if current_user.is_authenticated and sound.author_id == current_user.id %}
+                    <a class="btn btn-danger" href="/sound/{{ sound.id }}/delete">Удалить</a>
+                {% endif %}
             </div>
         {% endfor %}
+    </div>
 {% endblock %}

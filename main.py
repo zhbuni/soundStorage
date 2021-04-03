@@ -18,9 +18,17 @@ from werkzeug.utils import secure_filename
 
 import datetime
 import os
+import string
+import random
 
-from flask_restful import reqparse, abort, Api, Resource
+from flask_restful import abort, Api
 from data.sound_resources import SoundsResource
+
+
+def generate_random_string(n):
+    chrs = string.ascii_letters + string.digits
+    return ''.join([random.choice(chrs) for _ in range(n)])
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = generate_random_string(15)
@@ -36,6 +44,17 @@ login_manager.init_app(app)
 
 db_session.global_init("db/soundStorage.db")
 db_sess = db_session.create_session()
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(401)
+def not_found_error(error):
+    return render_template('401.html'), 401
+
 
 
 @login_manager.user_loader
@@ -71,14 +90,9 @@ def register():
         file = form.file.data
         # если пришел файл, то ставим аватарку. если нет, до дефолтную картинку
         if file:
-            last_id = db_sess.query(User).order_by(User.id.desc()).first()
-            if not last_id:
-                last_id = 0
-            else:
-                last_id = last_id.id
             filename = secure_filename(file.filename)
             # создаем название файла с новым именем и оригинальным разширением
-            filename = str(last_id + 1) + '.' + filename.split('.')[-1]
+            filename = generate_random_string(9) + '.' + filename.split('.')[-1]
             user.image = filename
             file.save(os.path.join('static', 'images/', filename))
         else:
@@ -117,10 +131,7 @@ def login():
 @app.route('/')
 def index():
     sounds = db_sess.query(Sound).all()
-    data = []
-    for sound in sounds:
-        data.append([sound, db_sess.query(User).get(sound.author_id)])
-    return render_template('index.html', title='Sound Storage', data=data)
+    return render_template('index.html', title='Sound Storage', sounds=sounds)
 
 
 @app.route('/sound/<int:sound_id>', methods=["GET", "POST"])
@@ -141,7 +152,7 @@ def detail(sound_id):
             db_sess.add(comment)
             db_sess.commit()
             return redirect('/sound/{}'.format(sound_id))
-    return render_template('detail.html', sound=sound, comments=comments, form=form)
+    return render_template('detail.html', sound=sound, comments=comments, form=form, title=sound.name)
 
 
 @app.route('/upload_sound', methods=['GET', 'POST'])
@@ -153,14 +164,9 @@ def upload_sound():
         # получаем файл
         file = form.file.data
         # получаем айди последней записи, чтобы дать имя новой
-        last_id = db_sess.query(Sound).order_by(Sound.id.desc()).first()
-        if not last_id:
-            last_id = 1
-        else:
-            last_id = last_id.id
         filename = secure_filename(file.filename)
         # создаем название файла с новым именем и оригинальным разширением
-        filename = str(last_id + 1) + '.' + filename.split('.')[-1]
+        filename = generate_random_string(9) + '.' + filename.split('.')[-1]
 
         sound = Sound(
             name=form.name.data,
@@ -179,20 +185,25 @@ def upload_sound():
 
 
 @app.route('/sound/<int:sound_id>/download')
+@login_required
 def download_sound(sound_id):
     sound = db_sess.query(Sound).get(sound_id)
+    sound.downloads += 1
+    db_sess.commit()
     return send_file(os.path.join(app.root_path, 'static/sounds', sound.filename), as_attachment=True)
 
 
 @app.route('/sound/<int:sound_id>/delete')
+@login_required
 def delete_sound(sound_id):
     sound = db_sess.query(Sound).get(sound_id)
     if not sound:
         return jsonify({'error': 'Not found'})
-    user_id = sound.user.id
-    db_sess.delete(sound)
-    db_sess.commit()
-    return redirect('/user/{}'.format(user_id))
+    if sound.author_id == current_user.id:
+        db_sess.delete(sound)
+        db_sess.commit()
+        return redirect('/user/{}'.format(current_user.id))
+    return redirect('/sound/' + str(sound.id))
 
 
 @app.route('/user/<int:user_id>')
@@ -205,8 +216,8 @@ def user_page(user_id):
         abort(404)
 
 
-@login_required
 @app.route('/update_profile_info', methods=['GET', 'POST'])
+@login_required
 def update_profile_info():
     form = UpdateProfileInfoForm()
     user = db_sess.query(User).get(current_user.id)
@@ -267,5 +278,4 @@ def update_profile_info():
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run()
