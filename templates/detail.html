@@ -18,6 +18,16 @@
         <source src="../../static/sounds/{{ sound.filename }}">
     </audio>
     <br>
+    <p>Тэги:
+        {% for tag in sound.tags %}
+            {% if not loop.last %}
+                {{ tag.name }},
+            {% else %}
+                {{ tag.name }}
+            {% endif %}
+        {% endfor %}
+    </p>
+    <br>
     <a href="/sound/{{ sound.id }}/download" class="btn btn-secondary">Скачать</a>
     <br>
     <br>

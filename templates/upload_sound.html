@@ -23,6 +23,15 @@
         {% endfor %}
     </p>
     <p>
+        {{ form.tags.label }}<br>
+        {{ form.tags(class="form-control") }}<br>
+        {% for error in form.tags.errors %}
+            <p content="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>
         {{ form.file.label }}<br>
         {{ form.file(class="form-control") }}<br>
         {% for error in form.file.errors %}

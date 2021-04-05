@@ -7,6 +7,7 @@ from wtforms.validators import DataRequired
 class UploadSoundForm(FlaskForm):
     name = StringField('Название', validators=[DataRequired()])
     description = TextAreaField('Описание')
+    tags = StringField('Тэги, разделенные запятыми. Например: sad, piano, game')
     file = FileField(validators=[FileRequired(),
                                  FileAllowed(['mp3', 'wav'], 'Только аудио mp3 и wav!')])
     submit = SubmitField('Загрузить')

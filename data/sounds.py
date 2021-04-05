@@ -18,3 +18,6 @@ class Sound(SqlAlchemyBase, SerializerMixin):
 
     author_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'))
     user = orm.relation('User')
+    tags = orm.relation("Tag",
+                        secondary="association",
+                        backref="sounds")

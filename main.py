@@ -1,8 +1,10 @@
 from flask import Flask, render_template, redirect, request, send_file, abort, jsonify
 from data import db_session
+
 from data.users import User
 from data.sounds import Sound
 from data.comments import Comment
+from data.tags import Tag
 
 from forms.login import LoginForm
 from forms.register import RegisterForm
@@ -173,6 +175,18 @@ def upload_sound():
             description=form.description.data,
             filename=filename,
             user=current_user)
+
+        tags = form.tags.data.strip()
+        if tags:
+            tags = set([i.strip() for i in tags.split(',')])
+            for tagname in tags:
+                tag = db_sess.query(Tag).filter(Tag.name == tagname.strip()).first()
+                # если такой тэг уже существует в бд, то не нужно создавать новый
+                if tag:
+                    sound.tags.append(tag)
+                # если такого тэга нет, то создаем новый
+                elif not tag:
+                    sound.tags.append(Tag(name=tagname.strip()))
 
         # сохраняем файл и добавляем запись в бд
         file.save(os.path.join('static/sounds/', filename))

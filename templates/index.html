@@ -24,6 +24,16 @@
                 <source src="../../static/sounds/{{ sound.filename }}">
             </audio>
             <br>
+            <p>Тэги:
+                {% for tag in sound.tags %}
+                    {% if not loop.last %}
+                        {{ tag.name }},
+                    {% else %}
+                        {{ tag.name }}
+                    {% endif %}
+                {% endfor %}
+            </p>
+            <br>
             {% if current_user.is_authenticated %}
                 <a href="/sound/{{ sound.id }}" class="btn btn-secondary">Скачать</a>
             {% else %}
