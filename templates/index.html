@@ -9,7 +9,11 @@
     {% endif %}
 
     <br>
-
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>{{form.select}}{{form.searchStr}}{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    </form>
+    <br>
     {% for sound in sounds %}
 
         <div class="soundpost">

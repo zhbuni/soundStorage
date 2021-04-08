@@ -4,13 +4,14 @@ from data import db_session
 from data.users import User
 from data.sounds import Sound
 from data.comments import Comment
-from data.tags import Tag
+from data.tags import Tag, association_table
 
 from forms.login import LoginForm
 from forms.register import RegisterForm
 from forms.comment import CommentForm
 from forms.upload_sound import UploadSoundForm
 from forms.update_profile_info import UpdateProfileInfoForm
+from forms.search import SearchForm
 
 from flask_login import LoginManager, login_user, \
     current_user, login_required, \
@@ -39,7 +40,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(
 )
 
 api = Api(app)
-api.add_resource(SoundsResource, '/api/sounds/<int:sound_id>')
+api.add_resource(SoundsResource, '/api/sounds/<string:sound_name>')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -56,7 +57,6 @@ def not_found_error(error):
 @app.errorhandler(401)
 def not_found_error(error):
     return render_template('401.html'), 401
-
 
 
 @login_manager.user_loader
@@ -130,10 +130,17 @@ def login():
     return render_template('login.html', title='Авторизация', form=form)
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    form = SearchForm()
     sounds = db_sess.query(Sound).all()
-    return render_template('index.html', title='Sound Storage', sounds=sounds)
+    if request.method == 'POST' and form.validate_on_submit():
+        if form.select.data == 'title':
+            sounds = db_sess.query(Sound).filter(Sound.name.like('%{}%'.format(form.searchStr.data)))
+        elif form.select.data == 'tag':
+            #TODO поиск по тэгам
+            pass
+    return render_template('index.html', title='Sound Storage', sounds=sounds, form=form)
 
 
 @app.route('/sound/<int:sound_id>', methods=["GET", "POST"])
@@ -289,6 +296,11 @@ def update_profile_info():
                 db_sess.commit()
 
     return render_template('update_profile_info.html', form=form)
+
+
+@app.route('/search/')
+def search():
+    return ''
 
 
 if __name__ == '__main__':
