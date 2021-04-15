@@ -4,7 +4,7 @@ from data import db_session
 from data.users import User
 from data.sounds import Sound
 from data.comments import Comment
-from data.tags import Tag, association_table
+from data.tags import Tag
 
 from forms.login import LoginForm
 from forms.register import RegisterForm
@@ -18,11 +18,13 @@ from flask_login import LoginManager, login_user, \
     logout_user
 
 from werkzeug.utils import secure_filename
+from werkzeug.urls import url_encode
 
 import datetime
 import os
 import string
 import random
+from math import ceil
 
 from flask_restful import abort, Api
 from data.sound_resources import SoundsResource
@@ -39,6 +41,9 @@ app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(
     days=365
 )
 
+# сколько звуков находится на одной странице
+SOUNDS_ON_PAGE = 5
+
 api = Api(app)
 api.add_resource(SoundsResource, '/api/sounds/<string:sound_name>')
 
@@ -47,6 +52,17 @@ login_manager.init_app(app)
 
 db_session.global_init("db/soundStorage.db")
 db_sess = db_session.create_session()
+
+
+# позволяет заменить аргументы из юрл. используется в ссылках на страницы в шаблоне
+@app.template_global()
+def modify_query(**new_values):
+    args = request.args.copy()
+
+    for key, value in new_values.items():
+        args[key] = value
+
+    return '{}?{}'.format(request.path, url_encode(args))
 
 
 @app.errorhandler(404)
@@ -133,14 +149,37 @@ def login():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     form = SearchForm()
-    sounds = db_sess.query(Sound).all()
+    # сперва новые
+    sounds = db_sess.query(Sound).order_by(Sound.datetime.desc())
+
+    # получаем фильтр по названию из юрл и фильтруем
+    title = request.args.get('title')
+    if title:
+        sounds = sounds.filter(Sound.name.like('%{}%'.format(title)))
+
+    # всего страниц
+    all_pages = ceil(len(sounds.all()) / SOUNDS_ON_PAGE)
+
+    # берем страницу из юрл. если ее нет, значит мы на первой. если страница невалидна, возвращаем 404
+    page = request.args.get('page')
+    if not page:
+        page = '1'
+    if page.isdigit() and int(page) > 0:
+        sounds = sounds.offset((int(page) - 1) * SOUNDS_ON_PAGE).limit(SOUNDS_ON_PAGE)
+    else:
+        abort(404)
+
+    # если мы нажали на кнопку поиска, то обрабатываем редирект
     if request.method == 'POST' and form.validate_on_submit():
         if form.select.data == 'title':
-            sounds = db_sess.query(Sound).filter(Sound.name.like('%{}%'.format(form.searchStr.data)))
+            return redirect(f'/?title={form.searchStr.data}')
+
         elif form.select.data == 'tag':
-            #TODO поиск по тэгам
+            # TODO: поиск по тэгам
             pass
-    return render_template('index.html', title='Sound Storage', sounds=sounds, form=form)
+
+    return render_template('index.html', title='Sound Storage', sounds=sounds, form=form, all_pages=all_pages,
+                           current_page=int(page))
 
 
 @app.route('/sound/<int:sound_id>', methods=["GET", "POST"])

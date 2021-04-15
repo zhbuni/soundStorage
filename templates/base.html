@@ -13,7 +13,7 @@
 <body>
 <header>
 
-    <h1>Sound Storage</h1>
+    <a href="/"><img src="../../static/images/logo.png" alt="" style="padding: 1px" width="25%"></a>
 
     <nav style="position: absolute; right: 10px; top: 10px;">
         {% if current_user.is_authenticated %}
@@ -26,6 +26,7 @@
         {% endif %}
     </nav>
 </header>
+<br>
 <!-- Begin page content -->
 <main role="main" class="container">
     {% block content %}{% endblock %}
