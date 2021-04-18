@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Api</title>
+    <link rel="stylesheet" href="../../static/css/style.css">
+</head>
+<body>
+{% extends "base.html" %}
+{% block content %}
+    <h1>Методы api</h1>
+    <ul>
+    <li style="font-weight: bold">id</li>
+    <p>Возвращает id всех звуков. Также есть параметр soundname, который принимает название звука. В таком случае
+        возвращает айди всех звуков с этим названием.</p>
+    <li style="font-weight: bold">sound/int:sound_id</li>
+    <p>Возвращает звук в виде байтовой строки, закодированной в base64.</p>
+    </ul>
+{% endblock %}
+</body>
+</html>

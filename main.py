@@ -4,7 +4,7 @@ from data import db_session
 from data.users import User
 from data.sounds import Sound
 from data.comments import Comment
-from data.tags import Tag, association_table
+from data.tags import Tag
 
 from forms.login import LoginForm
 from forms.register import RegisterForm
@@ -26,6 +26,7 @@ import random
 
 from flask_restful import abort, Api
 from data.sound_resources import SoundsResource
+from data.id_resources import IdsResource
 
 
 def generate_random_string(n):
@@ -40,7 +41,8 @@ app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(
 )
 
 api = Api(app)
-api.add_resource(SoundsResource, '/api/sounds/<string:sound_name>')
+api.add_resource(SoundsResource, '/api/sounds/<string:sound_id>')
+api.add_resource(IdsResource, '/api/id')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -138,8 +140,9 @@ def index():
         if form.select.data == 'title':
             sounds = db_sess.query(Sound).filter(Sound.name.like('%{}%'.format(form.searchStr.data)))
         elif form.select.data == 'tag':
-            #TODO поиск по тэгам
-            pass
+            sounds = db_sess.query(Sound).join(Tag,
+                                               Sound.tags).filter(
+                Tag.name.like('%{}%'.format(form.searchStr.data))).all()
     return render_template('index.html', title='Sound Storage', sounds=sounds, form=form)
 
 
@@ -298,10 +301,12 @@ def update_profile_info():
     return render_template('update_profile_info.html', form=form)
 
 
-@app.route('/search/')
+@app.route('/api/')
 def search():
-    return ''
+    return render_template('api_docs.html')
 
 
 if __name__ == '__main__':
-    app.run()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
+    # app.run()

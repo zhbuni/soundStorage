@@ -21,3 +21,5 @@ class Sound(SqlAlchemyBase, SerializerMixin):
     tags = orm.relation("Tag",
                         secondary="association",
                         backref="sounds")
+
+
