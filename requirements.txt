@@ -1,0 +1,8 @@
+flask
+sqlalchemy
+alembic
+flask_login
+flask_restful
+werkzeug
+flask_wtf
+wtforms
