@@ -12,8 +12,8 @@
 </head>
 <body>
 <header>
+    <a href="/" style="text-decoration: none; color: black"><h1>Sound Storage</h1></a> <a href="/api" style="position: absolute; left: 285px; top: 15px;">API</a>
 
-    <h1>Sound Storage</h1>    <a href="/api" style="position: absolute; left: 285px; top: 15px;">API</a>
     <nav style="position: absolute; right: 10px; top: 10px;">
         {% if current_user.is_authenticated %}
             <a class="btn btn-primary" href="/user/{{ current_user.id }}">{{ current_user.nickname }}</a>
@@ -25,6 +25,7 @@
         {% endif %}
     </nav>
 </header>
+<br>
 <!-- Begin page content -->
 <main role="main" class="container">
     {% block content %}{% endblock %}
