@@ -27,6 +27,7 @@ from forms.login import LoginForm
 from forms.register import RegisterForm
 from forms.search import SearchForm
 from forms.update_profile_info import UpdateProfileInfoForm
+from forms.update_sound_form import UpdateSoundForm
 from forms.upload_sound import UploadSoundForm
 
 
@@ -74,6 +75,11 @@ def modify_query(**new_values):
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('404.html'), 404
+
+
+@app.errorhandler(403)
+def not_found_error(error):
+    return render_template('403.html'), 401
 
 
 @app.errorhandler(401)
@@ -229,17 +235,7 @@ def upload_sound():
             filename=filename,
             user=current_user)
 
-        tags = form.tags.data.strip()
-        if tags:
-            tags = set([i.strip() for i in tags.split(',')])
-            for tagname in tags:
-                tag = db_sess.query(Tag).filter(Tag.name == tagname.strip()).first()
-                # если такой тэг уже существует в бд, то не нужно создавать новый
-                if tag:
-                    sound.tags.append(tag)
-                # если такого тэга нет, то создаем новый
-                elif not tag:
-                    sound.tags.append(Tag(name=tagname.strip()))
+        sound.set_tags(form.tags.data, db_sess)
 
         # сохраняем файл и добавляем запись в бд
         file.save(os.path.join('static/sounds/', filename))
@@ -273,7 +269,32 @@ def delete_sound(sound_id):
         db_sess.delete(sound)
         db_sess.commit()
         return redirect('/user/{}'.format(current_user.id))
-    return redirect('/sound/' + str(sound.id))
+    abort(403)
+
+
+@app.route('/sound/<int:sound_id>/update', methods=['POST', 'GET'])
+@login_required
+def update_sound(sound_id):
+    sound = db_sess.query(Sound).get(sound_id)
+    if not sound:
+        abort(404)
+    if sound.author_id != current_user.id:
+        abort(403)
+    form = UpdateSoundForm()
+
+    if request.method == 'GET':
+        form.name.data = sound.name
+        form.tags.data = ', '.join([tag.name for tag in sound.tags])
+        form.description.data = sound.description
+    if form.validate_on_submit():
+        sound.name = form.name.data
+        sound.set_tags(form.tags.data, db_sess)
+        sound.description = form.description.data
+
+        db_sess.commit()
+        return redirect('/')
+
+    return render_template('update_sound.html', title='Изменение звука', form=form)
 
 
 @app.route('/user/<int:user_id>')

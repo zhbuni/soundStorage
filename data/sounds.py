@@ -1,8 +1,9 @@
 import sqlalchemy
-from .db_session import SqlAlchemyBase
+from .db_session import SqlAlchemyBase, create_session
 from sqlalchemy import orm
 import datetime
 from sqlalchemy_serializer import SerializerMixin
+from .tags import Tag
 
 
 class Sound(SqlAlchemyBase, SerializerMixin):
@@ -22,4 +23,17 @@ class Sound(SqlAlchemyBase, SerializerMixin):
                         secondary="association",
                         backref="sounds")
 
-
+    def set_tags(self, tag_string, db_sess):
+        self.tags.clear()
+        tags = tag_string.strip()
+        if tags:
+            tags = set([i.strip() for i in tags.split(',')])
+            for tagname in tags:
+                if tagname:
+                    tag = db_sess.query(Tag).filter(Tag.name == tagname.strip()).first()
+                    # если такой тэг уже существует в бд, то не нужно создавать новый
+                    if tag:
+                        self.tags.append(tag)
+                    # если такого тэга нет, то создаем новый
+                    elif not tag:
+                        self.tags.append(Tag(name=tagname.strip()))
