@@ -18,6 +18,11 @@ class RegisterResource(Resource):
         if 'password' not in body or 'email' not in body or 'nickname' not in body:
             return jsonify({'error': 'Bad request'})
 
+        if db_sess.query(User).filter(
+                User.nickname == body['nickname']).first() or db_sess.query(User).filter(
+            User.email == body['email']).first():
+            return jsonify({'error': 'User already exists'})
+
         user = User()
         user.nickname = body['nickname']
         user.email = body['email']
