@@ -1,10 +1,10 @@
-from . import db_session
-from .sounds import Sound
-from flask import jsonify, request
-from flask_restful import Resource
-import base64
 import json
-from os import path
+
+from flask import request
+from flask_restful import Resource
+
+from .. import db_session
+from ..sounds import Sound
 
 
 class IdsResource(Resource):

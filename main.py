@@ -1,34 +1,33 @@
-from flask import Flask, render_template, redirect, request, send_file, abort, jsonify
-from data import db_session
+import datetime
+import os
+import random
+import string
+from math import ceil
 
-from data.users import User
-from data.sounds import Sound
-from data.comments import Comment
-from data.tags import Tag
-
-from forms.login import LoginForm
-from forms.register import RegisterForm
-from forms.comment import CommentForm
-from forms.upload_sound import UploadSoundForm
-from forms.update_profile_info import UpdateProfileInfoForm
-from forms.search import SearchForm
-
+from flask import Flask, render_template, redirect, request, send_file, abort
+from flask_jwt_extended import JWTManager
 from flask_login import LoginManager, login_user, \
     current_user, login_required, \
     logout_user
-
-from werkzeug.utils import secure_filename
-from werkzeug.urls import url_encode
-
-import datetime
-import os
-import string
-import random
-from math import ceil
-
 from flask_restful import abort, Api
-from data.sound_resources import SoundsResource
-from data.id_resources import IdsResource
+from werkzeug.urls import url_encode
+from werkzeug.utils import secure_filename
+
+from data import db_session
+from data.comments import Comment
+from data.resources.auth import RegisterResource, LoginResource
+from data.resources.id_resources import IdsResource
+from data.resources.sound_resources import SoundsResource
+from data.resources.user_resources import UserResource
+from data.sounds import Sound
+from data.tags import Tag
+from data.users import User
+from forms.comment import CommentForm
+from forms.login import LoginForm
+from forms.register import RegisterForm
+from forms.search import SearchForm
+from forms.update_profile_info import UpdateProfileInfoForm
+from forms.upload_sound import UploadSoundForm
 
 
 def generate_random_string(n):
@@ -42,12 +41,17 @@ app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(
     days=365
 )
 
+jwt = JWTManager(app)
+
 # сколько звуков находится на одной странице
 SOUNDS_ON_PAGE = 5
 
 api = Api(app)
 api.add_resource(SoundsResource, '/api/sounds/<string:sound_id>')
 api.add_resource(IdsResource, '/api/id')
+api.add_resource(RegisterResource, '/api/auth/register')
+api.add_resource(LoginResource, '/api/auth/login')
+api.add_resource(UserResource, '/api/user/<int:user_id>')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -251,6 +255,8 @@ def upload_sound():
 @login_required
 def download_sound(sound_id):
     sound = db_sess.query(Sound).get(sound_id)
+    if not sound:
+        abort(404)
     sound.downloads += 1
     db_sess.commit()
     return send_file(os.path.join(app.root_path, 'static/sounds', sound.filename), as_attachment=True)
@@ -261,8 +267,9 @@ def download_sound(sound_id):
 def delete_sound(sound_id):
     sound = db_sess.query(Sound).get(sound_id)
     if not sound:
-        return jsonify({'error': 'Not found'})
+        abort(404)
     if sound.author_id == current_user.id:
+        os.remove(os.path.join('static', 'sounds', sound.filename))
         db_sess.delete(sound)
         db_sess.commit()
         return redirect('/user/{}'.format(current_user.id))
@@ -347,5 +354,5 @@ def search():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
-    # app.run()
+    # app.run(host='0.0.0.0', port=port)
+    app.run()
