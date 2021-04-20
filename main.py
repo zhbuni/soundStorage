@@ -196,6 +196,7 @@ def index():
 
 
 @app.route('/sound/<int:sound_id>', methods=["GET", "POST"])
+@login_required
 def detail(sound_id):
     form = CommentForm()
     sound = db_sess.query(Sound).get(sound_id)
