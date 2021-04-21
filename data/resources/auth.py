@@ -15,7 +15,7 @@ class RegisterResource(Resource):
 
         body = request.get_json()
 
-        if 'password' not in body or 'email' not in body or 'nickname' not in body:
+        if not body or 'password' not in body or 'email' not in body or 'nickname' not in body:
             return jsonify({'error': 'Bad request'})
 
         if db_sess.query(User).filter(
@@ -31,7 +31,7 @@ class RegisterResource(Resource):
         if 'profile_description' in body:
             user.profile_description = body['profile_description']
 
-        user.image = 'picture.jpg'
+        user.image = 'default-profile-picture.jpg'
         db_sess.add(user)
         db_sess.commit()
 
@@ -44,7 +44,7 @@ class LoginResource(Resource):
 
         body = request.get_json()
 
-        if 'password' not in body or 'email' not in body:
+        if not body or 'password' not in body or 'email' not in body:
             return jsonify({'error': 'Bad request'})
 
         user = db_sess.query(User).filter(User.email == body['email']).first()
