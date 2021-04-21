@@ -15,10 +15,13 @@ from werkzeug.utils import secure_filename
 
 from data import db_session
 from data.comments import Comment
+
 from data.resources.auth import RegisterResource, LoginResource
 from data.resources.id_resources import IdsResource
 from data.resources.sound_resources import SoundsResource
 from data.resources.user_resources import UserResource
+from data.resources.sounds_info_resources import SoundsInfoResource
+
 from data.sounds import Sound
 from data.tags import Tag
 from data.users import User
@@ -47,11 +50,12 @@ jwt = JWTManager(app)
 SOUNDS_ON_PAGE = 5
 
 api = Api(app)
-api.add_resource(SoundsResource, '/api/sounds/<string:sound_id>')
 api.add_resource(IdsResource, '/api/id')
 api.add_resource(RegisterResource, '/api/auth/register')
 api.add_resource(LoginResource, '/api/auth/login')
 api.add_resource(UserResource, '/api/user/<int:user_id>')
+api.add_resource(SoundsResource, '/api/sounds/<string:sound_id>/download')
+api.add_resource(SoundsInfoResource, '/api/sounds/<int:sound_id>')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -120,7 +124,7 @@ def register():
             user.image = filename
             file.save(os.path.join('static', 'images/', filename))
         else:
-            user.image = 'default-profile-picture.jpg'
+            user.image = 'picture.jpg'
 
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -329,7 +333,7 @@ def update_profile_info():
                 filename = secure_filename(file.filename)
                 # создаем название файла с новым именем и оригинальным разширением
                 filename = generate_random_string(9) + '.' + filename.split('.')[-1]
-                if user.image != 'default-profile-picture.jpg':
+                if user.image != 'picture.jpg':
                     os.remove(os.path.join('static', 'images', user.image))
 
                 user.image = filename
@@ -339,9 +343,9 @@ def update_profile_info():
             return redirect('/user/' + str(user.id))
 
         else:
-            if user.image != 'default-profile-picture.jpg':
+            if user.image != 'picture.jpg':
                 os.remove(os.path.join('static', 'images', user.image))
-                user.image = 'default-profile-picture.jpg'
+                user.image = 'picture.jpg'
                 db_sess.commit()
 
     return render_template('update_profile_info.html', form=form)

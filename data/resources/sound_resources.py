@@ -17,7 +17,10 @@ class SoundsResource(Resource):
         if not sound:
             return jsonify({'error': 'Not Found'})
         sound_file = open(os.path.join('static', 'sounds', sound.filename), 'rb')
-        cont = {'content': str(base64.b64encode(sound_file.read()))}
+        cont = dict()
+
+        cont['content'] = str(base64.b64encode(sound_file.read()))
+
         return json.dumps(cont)
 
     @jwt_required()

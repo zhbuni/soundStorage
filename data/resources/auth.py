@@ -26,7 +26,7 @@ class RegisterResource(Resource):
         if 'profile_description' in body:
             user.profile_description = body['profile_description']
 
-        user.image = 'default-profile-picture.jpg'
+        user.image = 'picture.jpg'
         db_sess.add(user)
         db_sess.commit()
 
