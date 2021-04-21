@@ -21,6 +21,7 @@ from data.resources.id_resources import IdsResource
 from data.resources.sound_resources import SoundsDownloadResource, SoundsResource, SoundsPostResource
 from data.resources.user_resources import UserResource
 from data.resources.comment_resources import CommentsListResource
+from forms.update_sound_form import UpdateSoundForm
 
 from data.sounds import Sound
 from data.tags import Tag
@@ -196,6 +197,7 @@ def index():
 
 
 @app.route('/sound/<int:sound_id>', methods=["GET", "POST"])
+@login_required
 def detail(sound_id):
     form = CommentForm()
     sound = db_sess.query(Sound).get(sound_id)

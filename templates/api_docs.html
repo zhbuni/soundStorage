@@ -14,8 +14,8 @@
         <p>Возвращает id всех звуков. Небязательные параметры в теле запроса: <strong>soundname, searchtype('title', 'tag')</strong>.
         Без параметров возращает айди всех звуков.</p>
     <li style="font-weight: bold">/api/sound/int:sound_id</li>
-        <p>Методы: <strong>GET, DELETE</strong>. Удалять может только автор, соотвественно. DELETE <strong>требует авторизацию.
-        </strong></p>
+        <p>Методы: <strong>GET, DELETE, PUT</strong>. Удалять может только автор, соотвественно.
+            DELETE, PUT <strong>требуют авторизацию.</strong></p>
      <li style="font-weight: bold">/api/user/int:user_id</li>
          <p>Возвращает данные о пользователе, включая аватар. Пример получения аватарки: <br>
          <code>

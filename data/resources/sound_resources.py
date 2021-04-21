@@ -68,6 +68,31 @@ class SoundsResource(Resource):
         else:
             return jsonify({'error': 'Not Found'})
 
+    @jwt_required()
+    def put(self, sound_id):
+        db_sess = db_session.create_session()
+        sound = db_sess.query(Sound).get(sound_id)
+        if not sound:
+            return jsonify({'error': 'Not Found'})
+        if sound.author_id != int(get_jwt_identity()):
+            return jsonify({'error': 'Action is Forbidden'})
+
+        body = request.get_json()
+        if not body or len({'name', 'description', 'tags'}.intersection(set(body.keys()))) == 0:
+            return jsonify({'error': 'Bad Request'})
+
+        if 'name' in body:
+            sound.name = body['name']
+        if 'description' in body:
+            sound.description = body['description']
+        if 'tags' in body and type(body['tags']) == list and body['tags']:
+            sound.set_tags(', '.join(body['tags']), db_sess)
+        elif 'tags' in body:
+            return jsonify({'error': 'Bad Request'})
+
+        db_sess.commit()
+        return jsonify({'success': '200'})
+
 
 class SoundsPostResource(Resource):
     @jwt_required()
