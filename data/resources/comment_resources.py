@@ -27,3 +27,7 @@ class CommentsListResource(Resource):
         db_sess.add(comment)
         db_sess.commit()
         return jsonify({'success': '200', 'id': str(comment.id)})
+
+    def get(self):
+        db_sess = db_session.create_session()
+        body = request.get_json()

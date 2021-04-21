@@ -18,9 +18,8 @@ from data.comments import Comment
 
 from data.resources.auth import RegisterResource, LoginResource
 from data.resources.id_resources import IdsResource
-from data.resources.sound_resources import SoundsResource
+from data.resources.sound_resources import SoundsResource, SoundsInfoResource
 from data.resources.user_resources import UserResource
-from data.resources.sounds_info_resources import SoundsInfoResource
 from data.resources.comment_resources import CommentsListResource
 
 from data.sounds import Sound
@@ -32,6 +31,7 @@ from forms.register import RegisterForm
 from forms.search import SearchForm
 from forms.update_profile_info import UpdateProfileInfoForm
 from forms.upload_sound import UploadSoundForm
+from forms.update_sound_form import UpdateSoundForm
 
 
 def generate_random_string(n):
@@ -82,6 +82,11 @@ def not_found_error(error):
     return render_template('404.html'), 404
 
 
+@app.errorhandler(403)
+def not_found_error(error):
+    return render_template('403.html'), 401
+
+
 @app.errorhandler(401)
 def not_found_error(error):
     return render_template('401.html'), 401
@@ -126,7 +131,7 @@ def register():
             user.image = filename
             file.save(os.path.join('static', 'images/', filename))
         else:
-            user.image = 'picture.jpg'
+            user.image = 'default-profile-default-profile-picture.jpg'
 
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -196,6 +201,7 @@ def index():
 
 
 @app.route('/sound/<int:sound_id>', methods=["GET", "POST"])
+@login_required
 def detail(sound_id):
     form = CommentForm()
     sound = db_sess.query(Sound).get(sound_id)
@@ -235,17 +241,7 @@ def upload_sound():
             filename=filename,
             user=current_user)
 
-        tags = form.tags.data.strip()
-        if tags:
-            tags = set([i.strip() for i in tags.split(',')])
-            for tagname in tags:
-                tag = db_sess.query(Tag).filter(Tag.name == tagname.strip()).first()
-                # если такой тэг уже существует в бд, то не нужно создавать новый
-                if tag:
-                    sound.tags.append(tag)
-                # если такого тэга нет, то создаем новый
-                elif not tag:
-                    sound.tags.append(Tag(name=tagname.strip()))
+        sound.set_tags(form.tags.data, db_sess)
 
         # сохраняем файл и добавляем запись в бд
         file.save(os.path.join('static/sounds/', filename))
@@ -279,7 +275,32 @@ def delete_sound(sound_id):
         db_sess.delete(sound)
         db_sess.commit()
         return redirect('/user/{}'.format(current_user.id))
-    return redirect('/sound/' + str(sound.id))
+    abort(403)
+
+
+@app.route('/sound/<int:sound_id>/update', methods=['POST', 'GET'])
+@login_required
+def update_sound(sound_id):
+    sound = db_sess.query(Sound).get(sound_id)
+    if not sound:
+        abort(404)
+    if sound.author_id != current_user.id:
+        abort(403)
+    form = UpdateSoundForm()
+
+    if request.method == 'GET':
+        form.name.data = sound.name
+        form.tags.data = ', '.join([tag.name for tag in sound.tags])
+        form.description.data = sound.description
+    if form.validate_on_submit():
+        sound.name = form.name.data
+        sound.set_tags(form.tags.data, db_sess)
+        sound.description = form.description.data
+
+        db_sess.commit()
+        return redirect('/')
+
+    return render_template('update_sound.html', title='Изменение звука', form=form)
 
 
 @app.route('/user/<int:user_id>')
@@ -335,7 +356,7 @@ def update_profile_info():
                 filename = secure_filename(file.filename)
                 # создаем название файла с новым именем и оригинальным разширением
                 filename = generate_random_string(9) + '.' + filename.split('.')[-1]
-                if user.image != 'picture.jpg':
+                if user.image != 'default-profile-picture.jpg':
                     os.remove(os.path.join('static', 'images', user.image))
 
                 user.image = filename
@@ -345,9 +366,9 @@ def update_profile_info():
             return redirect('/user/' + str(user.id))
 
         else:
-            if user.image != 'picture.jpg':
+            if user.image != 'default-profile-picture.jpg':
                 os.remove(os.path.join('static', 'images', user.image))
-                user.image = 'picture.jpg'
+                user.image = 'default-profile-picture.jpg'
                 db_sess.commit()
 
     return render_template('update_profile_info.html', form=form)
