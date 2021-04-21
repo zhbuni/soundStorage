@@ -43,7 +43,9 @@
                 {% else %}
                     <a href="/register" class="btn btn-secondary">Скачать</a>
                 {% endif %}
+
                 {% if current_user.is_authenticated and sound.author_id == current_user.id %}
+                    <a href="/sound/{{ sound.id }}/update" class="btn btn-secondary">Редактировать</a>
                     <a class="btn btn-danger" href="/sound/{{ sound.id }}/delete">Удалить</a>
                 {% endif %}
             </div>

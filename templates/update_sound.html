@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Загрузка звука</h1>
+<h1>Изменение звука</h1>
 <form action="" method="POST" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
     <p>
@@ -26,15 +26,6 @@
         {{ form.tags.label }}<br>
         {{ form.tags(class="form-control") }}<br>
         {% for error in form.tags.errors %}
-            <p content="alert alert-danger" role="alert">
-                {{ error }}
-            </p>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form.file.label }}<br>
-        {{ form.file(class="form-control") }}<br>
-        {% for error in form.file.errors %}
             <p content="alert alert-danger" role="alert">
                 {{ error }}
             </p>

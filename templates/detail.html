@@ -29,6 +29,9 @@
     </p>
     <br>
     <a href="/sound/{{ sound.id }}/download" class="btn btn-secondary">Скачать</a>
+    {% if sound.author_id == current_user.id %}
+        <a href="/sound/{{ sound.id }}/update" class="btn btn-secondary">Редактировать</a>
+    {% endif %}
     <br>
     <br>
     <br>
