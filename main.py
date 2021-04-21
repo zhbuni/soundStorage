@@ -18,9 +18,8 @@ from data.comments import Comment
 
 from data.resources.auth import RegisterResource, LoginResource
 from data.resources.id_resources import IdsResource
-from data.resources.sound_resources import SoundsResource
+from data.resources.sound_resources import SoundsDownloadResource, SoundsResource, SoundsPostResource
 from data.resources.user_resources import UserResource
-from data.resources.sounds_info_resources import SoundsInfoResource
 from data.resources.comment_resources import CommentsListResource
 
 from data.sounds import Sound
@@ -54,9 +53,10 @@ api = Api(app)
 api.add_resource(IdsResource, '/api/id')
 api.add_resource(RegisterResource, '/api/auth/register')
 api.add_resource(LoginResource, '/api/auth/login')
+api.add_resource(SoundsDownloadResource, '/api/sounds/<string:sound_id>/download')
+api.add_resource(SoundsPostResource, '/api/sounds/')
+api.add_resource(SoundsResource, '/api/sounds/<string:sound_id>')
 api.add_resource(UserResource, '/api/user/<int:user_id>')
-api.add_resource(SoundsResource, '/api/sounds/<string:sound_id>/download')
-api.add_resource(SoundsInfoResource, '/api/sounds/<int:sound_id>')
 api.add_resource(CommentsListResource, '/api/comments')
 
 login_manager = LoginManager()

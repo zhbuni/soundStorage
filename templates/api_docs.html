@@ -10,11 +10,38 @@
 {% block content %}
     <h1>Методы api</h1>
     <ul>
-    <li style="font-weight: bold">id</li>
-    <p>Возвращает id всех звуков. Также есть параметр soundname, который принимает название звука. В таком случае
-        возвращает айди всех звуков с этим названием.</p>
-    <li style="font-weight: bold">sound/int:sound_id</li>
-    <p>Возвращает звук в виде байтовой строки, закодированной в base64.</p>
+    <li style="font-weight: bold">/api/id</li>
+        <p>Возвращает id всех звуков. Небязательные параметры в теле запроса: <strong>soundname, searchtype('title', 'tag')</strong>.
+        Без параметров возращает айди всех звуков.</p>
+    <li style="font-weight: bold">/api/sound/int:sound_id</li>
+        <p>Методы: <strong>GET, DELETE</strong>. Удалять может только автор, соотвественно. DELETE <strong>требует авторизацию.
+        </strong></p>
+     <li style="font-weight: bold">/api/user/int:user_id</li>
+         <p>Возвращает данные о пользователе, включая аватар. Пример получения аватарки: <br>
+         <code>
+        from requests import get <br>
+        from PIL import Image<br>
+        import base64<br>
+        from io import BytesIO<br>
+         <br>
+        response = get('http://127.0.0.1:5000/api/user/1')<br>
+        content = response.json()<br>
+        s = base64.decodebytes((bytes(content['image'], encoding='utf-8')))<br>
+        Image.open(BytesIO(s)).show()</code></p>
+    <li style="font-weight: bold">/api/comments</li>
+        <p>Пост комментария. Обязательные параметры тела запроса: <strong>content, sound_id</strong>.
+        Где content - сам комментарий. <strong>Требует авторизацию.</strong></p>
+    <li style="font-weight: bold">/api/auth/register</li>
+        <p>Регистрация. Обязательные параметры тела запроса: <strong>nickname, email, password</strong>.
+        Необязательные: <strong>profile_description</strong>.</p>
+    <li style="font-weight: bold">/api/auth/login</li>
+        <p>Авторизация. Параметры: <strong>email, password</strong>.</p>
+    <li style="font-weight: bold">/api/sound/int:sound_id/download</li>
+        <p>Возращает звук в байтовом представлении, закодированном в base64. Требудет авторизацию.</p>
+    <li style="font-weight: bold">/api/sound/</li>
+        <p>Метод: <strong>POST</strong>. Обязательные параметры тела запроса: <strong> filename, title, description,
+        content</strong>. Content должен представлять из себя байтовую строку mp3 файла, закодированную в base64.
+        <strong>Требует авторизацию.</strong></p>
     </ul>
 {% endblock %}
 </body>
