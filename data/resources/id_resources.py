@@ -1,6 +1,4 @@
-import json
-
-from flask import request
+from flask import request, jsonify
 from flask_restful import Resource
 
 from .. import db_session
@@ -33,4 +31,4 @@ class IdsResource(Resource):
                 cont[el[0]] = [el[1]]
             else:
                 cont[el[0]] += [el[1]]
-        return json.dumps(cont)
+        return jsonify(cont)
