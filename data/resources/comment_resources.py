@@ -30,4 +30,25 @@ class CommentsListResource(Resource):
 
     def get(self):
         db_sess = db_session.create_session()
-        body = request.get_json()
+        res = {'comments': []}
+        comments = db_sess.query(Comment).all()
+        for comment in comments:
+            res['comments'].append({'id': comment.id,
+                                    'content': comment.content,
+                                    'datetime': comment.datetime,
+                                    'sound_id': comment.sound_id,
+                                    'user_id': comment.user_id})
+        return jsonify(res)
+
+
+class CommentResource(Resource):
+    def get(self, comment_id):
+        db_sess = db_session.create_session()
+        comment = db_sess.query(Comment).get(comment_id)
+        if not comment:
+            return jsonify({'error': 'Not Found'})
+        return jsonify({'comment': {
+                                    'content': comment.content,
+                                    'datetime': comment.datetime,
+                                    'sound_id': comment.sound_id,
+                                    'user_id': comment.user_id}})

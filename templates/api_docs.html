@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:int="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Api</title>
@@ -8,60 +8,84 @@
 <body>
 {% extends "base.html" %}
 {% block content %}
-    <h1>Методы api</h1>
-    <ul>
-    <li style="font-weight: bold">/api/id</li>
-        <p>Возвращает id всех звуков. Небязательные параметры в теле запроса: <strong>soundname, searchtype('title', 'tag')</strong>.
-        Без параметров возращает айди всех звуков.</p>
-    <li style="font-weight: bold">/api/sound/int:sound_id</li>
-        <p>Методы: <strong>GET, DELETE, PUT</strong>. Удалять может только автор, соотвественно.
-            DELETE, PUT <strong>требуют авторизацию.</strong></p>
-     <li style="font-weight: bold">/api/user/int:user_id</li>
-         <p>Возвращает данные о пользователе, включая аватар. Пример получения аватарки: <br>
-         <code>
-        from requests import get <br>
-        from PIL import Image<br>
-        import base64<br>
-        from io import BytesIO<br>
-         <br>
-        response = get('http://127.0.0.1:5000/api/user/1')<br>
-        content = response.json()<br>
-        s = base64.decodebytes((bytes(content['image'], encoding='utf-8')))<br>
-        Image.open(BytesIO(s)).show()</code></p>
-    <li style="font-weight: bold">/api/comments</li>
-        <p>Пост комментария. Обязательные параметры тела запроса: <strong>content, sound_id</strong>.
-        Где content - сам комментарий. <strong>Требует авторизацию.</strong></p>
+<h1>Методы api</h1>
+<p>(Все параметры передаются в json запроса)</p>
+<ul>
     <li style="font-weight: bold">/api/auth/register</li>
-        <p>Регистрация. Обязательные параметры тела запроса: <strong>nickname, email, password</strong>.
-        Необязательные: <strong>profile_description</strong>.</p>
+    <p>Метод: <strong>POST</strong>. Регистрация. Обязательные параметры тела запроса: <strong>nickname, email,
+        password</strong>.
+        Необязательные: <strong>profile_description</strong>. Возвращает id созданного пользователя</p>
+
     <li style="font-weight: bold">/api/auth/login</li>
-        <p>Авторизация. Параметры: <strong>email, password</strong>.</p>
-    <li style="font-weight: bold">/api/sound/int:sound_id/download</li>
-        <p>Возращает звук в байтовом представлении, закодированном в base64. Требудет авторизацию.</p>
-    <li style="font-weight: bold">/api/sound/</li>
-        <p>Метод: <strong>POST</strong>. Обязательные параметры тела запроса: <strong> filename, title, description,
-        content</strong>. Content должен представлять из себя байтовую строку mp3 файла, закодированную в base64.
-        <strong>Требует авторизацию.</strong> Пример загрузки звука:
+    <p>Метод: <strong>POST</strong>. Авторизация. Параметры: <strong>email, password</strong>. При успешной авторизации
+        возвращает токен,
+        его необходимо сохранить. Токен действует 7 дней после его получения.
+        Для использования методов, требующих авторизации, в заголовках запроса необходимо указывать
+        <code>'Authorization': 'Bearer *your_token*'</code></p>
+
+    <li style="font-weight: bold">/api/id</li>
+    <p>Метод: <strong>GET</strong>. Возвращает id всех звуков. Необязательные параметры в теле запроса: <strong>soundname,
+        searchtype('title',
+        'tag')</strong>.
+        Без параметров возращает айди всех звуков.</p>
+
+    <li style="font-weight: bold">/api/sound/int:sound_id</li>
+    <p>Методы: <strong>GET, DELETE, PUT</strong>. Удалять может только автор, соответственно.
+        DELETE, PUT <strong>требуют авторизацию.</strong></p>
+
+    <li style="font-weight: bold">/api/user/int:user_id</li>
+    <p>Метод: <strong>GET</strong>. Возвращает данные о пользователе, включая аватар. Пример получения аватарки: <br>
         <code>
-            <br> from requests import post <br>
+            from requests import get <br>
+            from PIL import Image<br>
             import base64<br>
+            from io import BytesIO<br>
             <br>
-            <br>
-            with open('example.wav', mode='rb') as file:
-            <br>   s = file.read()<br>
-            s1 = base64.encodebytes(s).decode('utf-8')<br>
-            dct = dict()<br>
-            dct['content'] = s1<br>
-            dct['title'] = 'title'<br>
-            dct['filename'] = 'example.wav'<br>
-            dct['description'] = 'desc'<br>
-            <br>
-            response = post('http://127.0.0.1:5000/api/sounds', json=dct,<br>
-                            headers={'x-access-tokens': 'TOKEN',<br>
-                                     'Content-Type': 'application/json'})<br>
+            response = get('http://127.0.0.1:5000/api/user/1')<br>
+            content = response.json()<br>
+            s = base64.decodebytes((bytes(content['image'], encoding='utf-8')))<br>
+            Image.open(BytesIO(s)).show()</code></p>
+    <p>Метод: <strong>PUT</strong>. Изменяет информацию о пользователе. <strong>Требует авторизацию.</strong>
+        Параметры: <strong>nickname, profile_description, email, password, picture, delete_picture.</strong><br>
+        picture - Это словарь с двумя ключами: filename(название файла) и content(данные о фото).
+        delete_picture(True, False) - удалить ли существующую фотографию.
+        delete_picture и picture <strong>не могут быть в одном запросе</strong>.
+        Пример загрузки фото:
+        <br>
+        <code>
+            import base64<br>
+            import requests<br>
+
+            with open('photo.jpg', mode='rb') as file:<br>
+            img = file.read()<br>
+            res = base64.encodebytes(img).decode('utf-8')<br>
+            token = 'your_token'<br>
+            a = requests.put('??/api/user/1', json={"picture": {"filename": "a.jpg", "content":<br>
+            res}}, headers={'Authorization': 'Bearer ' + token})<br>
 
         </code></p>
-    </ul>
-    {% endblock %}
+
+    <p>Метод: <strong>DELETE</strong>. Удаление профиля человека. <strong>Требует авторизацию.</strong></p>
+
+    <li style="font-weight: bold">/api/comments</li>
+    <p>Метод: <strong>POST</strong>. Пост комментария. Обязательные параметры тела запроса: <strong>content,
+        sound_id</strong>.
+        Где content - сам комментарий. <strong>Требует авторизацию.</strong></p>
+    <p>Метод: <strong>GET</strong>. Получает все комментарии</p>
+
+    <li style="font-weight: bold">/api/comments/int:comment_id</li>
+    <p>Метод: <strong>GET</strong>. Получает комментарий по заданному id</p>
+
+    <li style="font-weight: bold">/api/sounds/int:sound_id/download</li>
+    <p>Метод: <strong>GET</strong>. Возвращает звук в байтовом представлении, закодированном в base64. <strong>Требует авторизацию.</strong></p>
+
+    <li style="font-weight: bold">/api/sounds/</li>
+    <p>Метод: <strong>POST</strong>. Загружает звук на сервер. Обязательные параметры тела запроса: <strong> filename,
+        title, description,
+        content</strong>. Content должен представлять из себя байтовую строку mp3 файла, закодированную в base64.
+        <strong>Требует авторизацию.</strong></p>
+
+</ul>
+{% endblock %}
 </body>
 </html>

@@ -38,8 +38,12 @@ class SoundsResource(Resource):
         tag = session.query(tags.Tag).join(tags.Tag,
                                            Sound.tags).filter(Sound.id == sound_id).all()
 
-        comment = session.query(comments.Comment).filter(comments.Comment.sound_id == sound_id).all()
-        cont['comments'] = [com.content for com in comment]
+        sound_comments = session.query(comments.Comment).filter(comments.Comment.sound_id == sound_id).all()
+        cont['comments'] = [{'id': comment.id,
+                                    'content': comment.content,
+                                    'datetime': comment.datetime,
+                                    'sound_id': comment.sound_id,
+                                    'user_id': comment.user_id} for comment in sound_comments]
         cont['tags'] = [tg.name for tg in tag]
         cont['name'] = sound.name
         cont['description'] = sound.description
