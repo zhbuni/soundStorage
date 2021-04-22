@@ -41,7 +41,7 @@
             import base64<br>
             from io import BytesIO<br>
             <br>
-            response = get('http://127.0.0.1:5000/api/user/1')<br>
+            response = get('http://soundstorage.herokuapp.com/api/user/1')<br>
             content = response.json()<br>
             s = base64.decodebytes((bytes(content['image'], encoding='utf-8')))<br>
             Image.open(BytesIO(s)).show()</code></p>
@@ -60,7 +60,7 @@
             img = file.read()<br>
             res = base64.encodebytes(img).decode('utf-8')<br>
             token = 'your_token'<br>
-            a = requests.put('??/api/user/1', json={"picture": {"filename": "a.jpg", "content":<br>
+            a = requests.put('http://soundstorage.herokuapp.com/api/user/1', json={"picture": {"filename": "a.jpg", "content":<br>
             res}}, headers={'Authorization': 'Bearer ' + token})<br>
 
         </code></p>
@@ -97,7 +97,7 @@
             dct['filename'] = 'example.wav'<br>
             dct['description'] = 'desc'<br>
             <br>
-            response = post('http://127.0.0.1:5000/api/sounds', json=dct,<br>
+            response = post('http://soundstorage.herokuapp.com/api/sounds', json=dct,<br>
                             headers={'x-access-tokens': 'TOKEN',<br>
                                      'Content-Type': 'application/json'})<br>
 

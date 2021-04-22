@@ -244,7 +244,7 @@ def upload_sound():
         sound.set_tags(form.tags.data, db_sess)
 
         # сохраняем файл и добавляем запись в бд
-        file.save(os.path.join('static', 'sounds'))
+        file.save(os.path.join('static', 'sounds', filename))
         db_sess.add(sound)
         db_sess.commit()
 
@@ -261,7 +261,7 @@ def download_sound(sound_id):
         abort(404)
     sound.downloads += 1
     db_sess.commit()
-    return send_file(os.path.join(app.root_path, 'static/sounds', sound.filename), as_attachment=True)
+    return send_file(os.path.join(app.root_path, 'static', 'sounds', sound.filename), as_attachment=True)
 
 
 @app.route('/sound/<int:sound_id>/delete')
@@ -360,7 +360,7 @@ def update_profile_info():
                     os.remove(os.path.join('static', 'images', user.image))
 
                 user.image = filename
-                file.save(os.path.join('static', 'images/', filename))
+                file.save(os.path.join('static', 'images', filename))
 
             db_sess.commit()
             return redirect('/user/' + str(user.id))
