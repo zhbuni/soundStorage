@@ -41,8 +41,27 @@
     <li style="font-weight: bold">/api/sound/</li>
         <p>Метод: <strong>POST</strong>. Обязательные параметры тела запроса: <strong> filename, title, description,
         content</strong>. Content должен представлять из себя байтовую строку mp3 файла, закодированную в base64.
-        <strong>Требует авторизацию.</strong></p>
+        <strong>Требует авторизацию.</strong> Пример загрузки звука:
+        <code>
+            <br> from requests import post <br>
+            import base64<br>
+            <br>
+            <br>
+            with open('example.wav', mode='rb') as file:
+            <br>   s = file.read()<br>
+            s1 = base64.encodebytes(s).decode('utf-8')<br>
+            dct = dict()<br>
+            dct['content'] = s1<br>
+            dct['title'] = 'title'<br>
+            dct['filename'] = 'example.wav'<br>
+            dct['description'] = 'desc'<br>
+            <br>
+            response = post('http://127.0.0.1:5000/api/sounds', json=dct,<br>
+                            headers={'x-access-tokens': 'TOKEN',<br>
+                                     'Content-Type': 'application/json'})<br>
+
+        </code></p>
     </ul>
-{% endblock %}
+    {% endblock %}
 </body>
 </html>
