@@ -5,3 +5,4 @@ WTForms~=2.3.3
 alembic~=1.5.7
 Flask-JWT-Extended~=4.1.0
 FLask-Login~=0.5.0
+Flask-RESTful~=0.3.8
