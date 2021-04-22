@@ -82,7 +82,7 @@
     <li style="font-weight: bold">/api/sounds/</li>
     <p>Метод: <strong>POST</strong>. Загружает звук на сервер. Обязательные параметры тела запроса: <strong> filename,
         title, description,
-        content</strong>. Content должен представлять из себя байтовую строку mp3 файла, закодированную в base64.
+        content</strong>. Content должен представлять из себя байтовую строку mp3 или wav файла, закодированную в base64.
         <strong>Требует авторизацию.</strong><code>
             <br> from requests import post <br>
             import base64<br>
