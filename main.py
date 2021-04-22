@@ -244,6 +244,7 @@ def upload_sound():
         sound.set_tags(form.tags.data, db_sess)
 
         # сохраняем файл и добавляем запись в бд
+        open(os.path.join('static', 'sounds', filename)).close()
         file.save(os.path.join('static', 'sounds', filename))
         db_sess.add(sound)
         db_sess.commit()
